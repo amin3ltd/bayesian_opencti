@@ -180,8 +180,10 @@ Result (latest): **78 passed**
 python3 scripts/validate_sample_data.py
 ```
 
-What it checks:
+What it checks (data):
 - STIX 2.1 parse validation for each object.
+- Required fields and referential integrity for relationships.
+- Timestamp parsing and ordering checks (`created` ≤ `modified` ≤ `updated_at`).
 - Confidence bounds: numeric and within [0, 100].
 
 ### 6) Result validation procedure (calibration)
@@ -197,11 +199,21 @@ The same script performs calibration using proxy labels derived from sightings:
 This is a sparse proxy signal and should be interpreted as a sanity check rather
 than ground-truth calibration.
 
+### 7) Result validation procedure (graph/posterior checks)
+
+The same script performs model-level checks after building the graph:
+- Posterior bounds: all beliefs must be within [0, 1].
+- Graph integrity: no self-loops, weights within [0, 1].
+- Parent cap: max in-degree should respect the configured limit.
+
 ## Validation outcomes (sample_data.json)
 
 Data validation results:
 - STIX objects: 47
 - STIX parse errors: 0
+- Missing relationship references: 0
+- Timestamp parse errors: 0
+- Timestamp ordering issues: 0
 - Confidence present: 37
 - Confidence missing: 10
 - Confidence non-numeric: 0
@@ -216,6 +228,31 @@ Result validation (calibration, proxy labels):
 - ECE: 0.7773
 - MCE: 0.8667
 - n_bins: 5
+
+Graph/posterior validation:
+- Beliefs within [0, 1]: True
+- Max in-degree: 5
+- Self-loops: 0
+- Edge weights out of range: 0
+
+## Additional validation techniques (recommended)
+
+These techniques are not fully automated in the current scripts but are useful
+for research-grade validation:
+
+- **Reliability diagrams**: compare predicted confidence vs. observed accuracy.
+- **Sensitivity analysis**: perturb priors/weights to measure output stability.
+- **Temporal stability**: detect oscillations or drift in confidence history.
+- **Cross-source agreement**: compare with external feeds (MISP, VT, OTX).
+- **Ablation studies**: measure impact of removing edge types or time decay.
+- **Holdout evaluation**: use labeled outcomes when available for calibration.
+
+## Assumptions and limitations
+
+- Proxy labels from sightings are **not** ground truth; calibration is indicative.
+- Confidence propagation depends on relationship coverage and quality.
+- OpenCTI credentials and network access are required for live data ingestion.
+- API endpoints are unauthenticated; deploy behind trusted network controls.
 
 ## License
 
