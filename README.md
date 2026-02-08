@@ -172,7 +172,7 @@ python3 -m pytest -m e2e
 python3 -m pytest
 ```
 
-Result (latest): **77 passed**
+Result (latest): **78 passed**
 
 ### 5) Data validation procedure
 
