@@ -5,6 +5,7 @@ const contribsEl = document.getElementById('contribs-content');
 const pathsEl = document.getElementById('paths-content');
 const searchEl = document.getElementById('search');
 const fitBtn = document.getElementById('fit');
+const refreshBtn = document.getElementById('refresh');
 const recomputeBtn = document.getElementById('recompute');
 const exportBtn = document.getElementById('export');
 const zoomSlider = document.getElementById('zoom-slider');
@@ -281,6 +282,19 @@ function hookEvents(){
   });
 
   fitBtn.addEventListener('click', ()=>cy.fit(50));
+  refreshBtn.addEventListener('click', async ()=>{
+    refreshBtn.disabled = true;
+    const old = refreshBtn.textContent;
+    refreshBtn.textContent = 'Refreshing…';
+    try{
+      await fetchNetwork();
+    }catch(e){
+      setStatus('Refresh failed: '+e.message);
+    }finally{
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = old;
+    }
+  });
 
   exportBtn.addEventListener('click', async ()=>{
     try{
