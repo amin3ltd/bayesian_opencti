@@ -117,6 +117,24 @@ prob_true, prob_pred = calibration_curve(
 - [SciPy](https://scipy.org/) - Statistical tests for calibration
 - [MLmetrics](https://github.com/mlmetrics/mlmetrics) - Calibration error metrics
 
+#### Sample Data Calibration Snapshot (proxy labels)
+
+Using `sample_data.json`, we ran `validation.calibration.analyze_calibration` on
+objects with confidence scores (excluding relationship objects). Because the
+sample data does not include ground-truth outcomes, we used sightings as a proxy
+label: outcome = 1 for objects referenced by `sighting_of_ref` or
+`where_sighted_refs`, else 0. This is a sparse signal and should be treated as a
+sanity check only.
+
+- Eligible objects: 11
+- Observed positives (sightings): 1
+- Brier score: 0.6202
+- ECE: 0.7773
+- MCE: 0.8667
+- Bin counts (n_bins=5): [0, 1, 2, 2, 6]
+- Bin confidences: [0.0, 0.2, 0.55, 0.725, 0.867]
+- Bin accuracies: [0.0, 1.0, 0.0, 0.0, 0.0]
+
 ### 3. Cross-Validation with External Feeds
 
 Validate against independent threat intelligence sources:
