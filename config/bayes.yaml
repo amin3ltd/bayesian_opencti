@@ -1,0 +1,35 @@
+# Hybrid engine (cyclic SCC solver)
+lbp_damping: 0.55
+lbp_epsilon: 1.0e-4
+lbp_max_iters: 100
+
+# Relation semantics (examples)
+# default_rel_weight: 0.50
+# rel_type_weight:
+#   indicates: 0.75
+#   attributed-to: 0.65
+#   uses: 0.35
+#   targets: 0.45
+#   object: 0.50
+
+ema_alpha: 0.0                 # no smoothing, see raw posterior
+confidence_push_delta_min: 0   # push even tiny changes
+rel_type_weight:
+  indicates: 0.85              # make indicator->malware contribution strong
+  uses: 0.35
+  attributed-to: 0.65
+  targets: 0.45
+  object: 0.50
+
+
+# Time decay half-lives (days)
+time_decay_half_life:
+  Indicator: 60
+  Report: 90
+  Malware: 180
+  Intrusion-Set: 240
+  Threat-Actor-Individual: 240
+
+# Output stability
+ema_alpha: 0.35                 # 0..1
+confidence_push_delta_min: 2    # pp threshold

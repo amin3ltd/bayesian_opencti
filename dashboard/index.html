@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Bayesian OpenCTI Confidence Dashboard</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>Bayesian Confidence Scoring</h1>
+      <span class="tag">Bayesian Inference · OpenCTI 6.9.7</span>
+    </div>
+    <div class="header-controls">
+      <button id="theme-toggle" title="Toggle theme">🌙</button>
+      <div id="status" class="muted">Loading…</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- left panel -->
+    <aside id="about">
+      <h2>Bayesian Confidence Scoring</h2>
+      <div class="about-scroll">
+        <section>
+          <h3>Overview</h3>
+          <p>This dashboard visualizes automatic confidence scoring for OpenCTI threat intelligence entities using Bayesian networks. Confidence levels are computed based on relationships and evidence propagation.</p>
+        </section>
+        <section>
+          <h3>How It Works</h3>
+          <ul>
+            <li><strong>Priors</strong>: Default confidence based on entity type</li>
+            <li>Semantic relation weights (e.g., indicates &gt; uses)</li>
+            <li>Time-decay half-lives by type</li>
+            <li>Parent-cap (top-K) for stability & speed</li>
+            <li>EMA + hysteresis for output stability</li>
+          </ul>
+        </section>
+        <section>
+          <h3>Features</h3>
+          <ul>
+            <li>Interactive graph visualization</li>
+            <li>Explainable AI: contribution analysis and evidence paths</li>
+            <li>Confidence history tracking</li>
+            <li>Configurable parameters in <code>config/bayes.yaml</code></li>
+          </ul>
+        </section>
+      </div>
+      <div class="about-meta">
+        <button id="toggle-about">Hide</button>
+      </div>
+    </aside>
+
+    <!-- workspace -->
+    <section id="workspace">
+      <div id="controls">
+        <input id="search" placeholder="Search node by label or ID"/>
+        <button id="fit">Fit</button>
+        <button id="recompute">Recompute & Push</button>
+        <button id="export">Export Graph</button>
+        <label>Zoom: <input id="zoom-slider" type="range" min="0.1" max="2" step="0.1" value="1"></label>
+        <div class="legend">
+          <span class="legend-item"><span class="dot" style="background: var(--node-low)"></span> Low</span>
+          <span class="legend-item"><span class="dot" style="background: var(--node-mid)"></span> Mid</span>
+          <span class="legend-item"><span class="dot" style="background: var(--node-high)"></span> High</span>
+        </div>
+      </div>
+
+      <div id="graph"></div>
+
+      <div id="details">
+        <h2>Details</h2>
+        <div id="node-summary" class="panel">
+          <div class="panel-title">Node</div>
+          <div id="node-summary-content" class="muted">Click a node…</div>
+        </div>
+
+        <div id="contribs" class="panel">
+          <div class="panel-title">Parent Contributions</div>
+          <div id="contribs-content" class="muted">—</div>
+        </div>
+
+        <div id="paths" class="panel">
+          <div class="panel-title">Top Evidence Paths</div>
+          <div id="paths-content" class="muted">—</div>
+        </div>
+
+        <div id="history" class="panel">
+          <div class="panel-title">History</div>
+          <canvas id="hist-canvas" width="280" height="80"></canvas>
+          <div id="hist-caption" class="muted"></div>
+        </div>
+
+        <div class="footnote">Nodes resize & recolor on updates; hover entries for tooltips.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>Bayesian Confidence Scoring • Automatic assessment based on threat intelligence relationships • Configure in <code>config/bayes.yaml</code></div>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

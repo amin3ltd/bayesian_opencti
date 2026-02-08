@@ -1,0 +1,620 @@
+{
+  "type": "bundle",
+  "id": "bundle--f2262e90-0c59-4740-bc32-5df8ef07e739",
+  "objects": [
+    {
+      "type": "threat-actor",
+      "spec_version": "2.1",
+      "id": "threat-actor--b78b1d19-dd0c-48c5-8065-c227fa48c9c6",
+      "created": "2023-01-15T12:00:00Z",
+      "modified": "2023-01-15T12:00:00Z",
+      "name": "Silver Falcon",
+      "description": "An APT-style threat actor group believed to be state-sponsored, active since 2023.",
+      "threat_actor_types": [
+        "nation-state"
+      ],
+      "aliases": [
+        "Silver Falcon Group",
+        "Falcon Team"
+      ],
+      "roles": [
+        "spy",
+        "malware-author"
+      ],
+      "primary_motivation": "espionage",
+      "confidence": 90
+    },
+    {
+      "type": "threat-actor",
+      "spec_version": "2.1",
+      "id": "threat-actor--02b27e4b-9cbf-4ae5-8a44-d4e57b05ba07",
+      "created": "2024-06-01T08:30:00Z",
+      "modified": "2024-06-01T08:30:00Z",
+      "name": "The Raven",
+      "description": "A suspected individual hacker possibly affiliated with Silver Falcon.",
+      "threat_actor_types": [
+        "individual"
+      ],
+      "aliases": [
+        "Raven"
+      ],
+      "roles": [
+        "malware-development",
+        "initial-access"
+      ],
+      "goals": [
+        "financial gain"
+      ]
+
+    },
+    {
+      "type": "intrusion-set",
+      "spec_version": "2.1",
+      "id": "intrusion-set--1bfedb60-e7e1-4fa8-be14-b4baafc4c9dc",
+      "created": "2024-06-01T08:30:00Z",
+      "modified": "2024-06-01T08:30:00Z",
+      "name": "Falcon Strike",
+      "description": "A cluster of malicious activity associated with Silver Falcon, spanning multiple campaigns.",
+      "aliases": [
+        "FalconStrike"
+      ],
+      "first_seen": "2024-01-10T00:00:00Z",
+      "last_seen": "2025-12-15T00:00:00Z",
+      "resource_level": "organization",
+      "primary_motivation": "espionage",
+      "confidence": 75
+    },
+    {
+      "type": "campaign",
+      "spec_version": "2.1",
+      "id": "campaign--bfe30c78-817f-4102-891b-3326a721899b",
+      "created": "2024-01-15T09:00:00Z",
+      "modified": "2024-08-30T18:00:00Z",
+      "name": "Operation Blackout",
+      "description": "A mid-2024 campaign targeting energy sector companies, resulting in ransomware deployment.",
+      "first_seen": "2024-01-15T00:00:00Z",
+      "last_seen": "2024-08-15T00:00:00Z",
+      "objective": "Disrupt and extort energy utilities via ransomware.",
+      "confidence": 60
+    },
+    {
+      "type": "campaign",
+      "spec_version": "2.1",
+      "id": "campaign--90b69409-be42-43ef-af54-4f0a96899221",
+      "created": "2025-06-01T09:00:00Z",
+      "modified": "2025-12-20T12:00:00Z",
+      "name": "Operation Silent Star",
+      "description": "A late-2025 espionage campaign targeting defense contractors, focusing on data exfiltration.",
+      "first_seen": "2025-06-01T00:00:00Z",
+      "last_seen": "2025-12-15T00:00:00Z",
+      "objective": "Steal sensitive intellectual property from defense sector firms.",
+      "confidence": 90
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--64393411-22c4-4bd7-b119-8e8d58312ab8",
+      "created": "2024-06-01T08:30:00Z",
+      "modified": "2024-06-01T08:30:00Z",
+      "name": "Spearphishing Attachment",
+      "description": "Technique of sending targeted phishing emails with malicious attachments to deliver malware.",
+      "x_mitre_id": "T1566.001"
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--959cc688-af51-474f-856c-b304f2f0de18",
+      "created": "2025-05-01T08:00:00Z",
+      "modified": "2025-05-01T08:00:00Z",
+      "name": "Watering Hole",
+      "description": "Compromising a website likely visited by targets to deliver malware to visitors.",
+      "x_mitre_id": "T1598"
+    },
+    {
+      "type": "malware",
+      "spec_version": "2.1",
+      "id": "malware--fd0f43cf-01f1-4bc7-bf8a-0b2f4508d5e2",
+      "created": "2024-01-15T09:30:00Z",
+      "modified": "2024-01-15T09:30:00Z",
+      "name": "AlphaDrop",
+      "description": "A downloader/dropper trojan used to install secondary payloads (first stage malware).",
+      "malware_types": [
+        "dropper",
+        "downloader"
+      ],
+      "is_family": false,
+      "confidence": 70
+    },
+    {
+      "type": "malware",
+      "spec_version": "2.1",
+      "id": "malware--11a84e4d-0a85-40ec-8a3b-1714be404018",
+      "created": "2024-01-20T10:00:00Z",
+      "modified": "2024-01-20T10:00:00Z",
+      "name": "BetaRAT",
+      "description": "A remote access trojan providing backdoor capabilities for persistence and data theft.",
+      "malware_types": [
+        "remote-access-trojan",
+        "backdoor"
+      ],
+      "is_family": false,
+      "confidence": 80
+    },
+    {
+      "type": "malware",
+      "spec_version": "2.1",
+      "id": "malware--8e08615a-db42-4b50-947e-f23ce951d7a0",
+      "created": "2024-05-01T11:00:00Z",
+      "modified": "2024-05-01T11:00:00Z",
+      "name": "GammaRansom",
+      "description": "A ransomware strain used to encrypt data and demand payment, deployed by Silver Falcon.",
+      "malware_types": [
+        "ransomware"
+      ],
+      "is_family": false,
+      "confidence": 90
+    },
+    {
+      "type": "infrastructure",
+      "spec_version": "2.1",
+      "id": "infrastructure--9f1bcac4-506b-4815-b443-8846a0afb826",
+      "created": "2024-02-01T08:00:00Z",
+      "modified": "2024-02-01T08:00:00Z",
+      "name": "Silver Falcon C2 Cluster",
+      "description": "Command-and-control server infrastructure (IPs and domains) used for Silver Falcon operations.",
+      "infrastructure_types": [
+        "command-and-control"
+      ],
+      "confidence": 50
+    },
+    {
+      "type": "course-of-action",
+      "spec_version": "2.1",
+      "id": "course-of-action--2ce0e5fa-902d-4ff6-88fc-f80b52604eaa",
+      "created": "2024-06-01T09:00:00Z",
+      "modified": "2024-06-01T09:00:00Z",
+      "name": "Phishing Awareness Training",
+      "description": "Conduct regular phishing awareness training and simulations to mitigate spearphishing attacks."
+    },
+    {
+      "type": "course-of-action",
+      "spec_version": "2.1",
+      "id": "course-of-action--93d19a48-6bff-4dac-b29a-acb23a26b425",
+      "created": "2024-09-01T09:00:00Z",
+      "modified": "2024-09-01T09:00:00Z",
+      "name": "Regular Data Backups",
+      "description": "Maintain offline data backups to mitigate damage from ransomware attacks."
+    },
+    {
+      "type": "identity",
+      "spec_version": "2.1",
+      "id": "identity--59d56334-d721-42c1-b2e5-6f7e00d417a6",
+      "created": "2024-01-10T08:00:00Z",
+      "modified": "2024-01-10T08:00:00Z",
+      "name": "EnergeticWind Corp",
+      "description": "Energy sector company targeted in Operation Blackout.",
+      "identity_class": "organization",
+      "sectors": [
+        "energy"
+      ]
+    },
+    {
+      "type": "identity",
+      "spec_version": "2.1",
+      "id": "identity--51370f9a-4e84-4406-bafc-6b7db813a9fa",
+      "created": "2025-06-05T08:00:00Z",
+      "modified": "2025-06-05T08:00:00Z",
+      "name": "SkyGuard Defense LLC",
+      "description": "Defense contractor targeted in Operation Silent Star.",
+      "identity_class": "organization",
+      "sectors": [
+        "defense"
+      ]
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--56170111-5135-40fc-a239-ae72fd947a59",
+      "created": "2024-07-01T10:00:00Z",
+      "modified": "2024-07-01T10:00:00Z",
+      "name": "Malicious Domain serving malware",
+      "description": "Domain observed delivering malicious payloads (associated with Silver Falcon infrastructure).",
+      "indicator_types": [
+        "malicious-activity"
+      ],
+      "pattern": "[domain-name:value = 'malicious.example.com']",
+      "pattern_type": "stix",
+      "valid_from": "2024-07-01T00:00:00Z",
+      "confidence": 80
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--e1cb55a9-4097-47bb-b0a7-492ee3c05e43",
+      "created": "2024-07-01T10:05:00Z",
+      "modified": "2024-07-01T10:05:00Z",
+      "name": "Suspected C2 Server IP",
+      "description": "IP address likely used for command-and-control communications in Operation Blackout.",
+      "indicator_types": [
+        "malicious-activity"
+      ],
+      "pattern": "[ipv4-addr:value = '203.0.113.5']",
+      "pattern_type": "stix",
+      "valid_from": "2024-07-01T00:00:00Z",
+      "confidence": 20
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--50cad00d-23f2-4cf4-8cbc-d9675fdcc58d",
+      "created": "2024-07-10T12:00:00Z",
+      "modified": "2024-07-10T12:00:00Z",
+      "name": "GammaRansom Sample Hash",
+      "description": "File hash of a GammaRansom ransomware sample used in Operation Blackout.",
+      "indicator_types": [
+        "malicious-activity"
+      ],
+      "pattern": "[file:hashes.'SHA-256' = 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890']",
+      "pattern_type": "stix",
+      "valid_from": "2024-07-10T00:00:00Z",
+      "confidence": 90
+    },
+    {
+      "type": "report",
+      "spec_version": "2.1",
+      "id": "report--16f41ca3-71c3-41a4-96b9-6d545bbe07de",
+      "created": "2024-09-01T10:00:00Z",
+      "modified": "2024-09-01T10:00:00Z",
+      "name": "Operation Blackout Incident Report",
+      "description": "Detailed report on the Operation Blackout campaign, including tactics, malware, and indicators.",
+      "report_types": [
+        "campaign"
+      ],
+      "published": "2024-09-01T00:00:00Z",
+      "object_refs": [
+        "threat-actor--b78b1d19-dd0c-48c5-8065-c227fa48c9c6",
+        "campaign--bfe30c78-817f-4102-891b-3326a721899b",
+        "indicator--56170111-5135-40fc-a239-ae72fd947a59",
+        "malware--11a84e4d-0a85-40ec-8a3b-1714be404018",
+        "indicator--50cad00d-23f2-4cf4-8cbc-d9675fdcc58d",
+        "malware--fd0f43cf-01f1-4bc7-bf8a-0b2f4508d5e2",
+        "intrusion-set--1bfedb60-e7e1-4fa8-be14-b4baafc4c9dc",
+        "course-of-action--93d19a48-6bff-4dac-b29a-acb23a26b425",
+        "attack-pattern--64393411-22c4-4bd7-b119-8e8d58312ab8",
+        "course-of-action--2ce0e5fa-902d-4ff6-88fc-f80b52604eaa",
+        "indicator--e1cb55a9-4097-47bb-b0a7-492ee3c05e43",
+        "malware--8e08615a-db42-4b50-947e-f23ce951d7a0",
+        "identity--59d56334-d721-42c1-b2e5-6f7e00d417a6"
+      ]
+    },
+    {
+      "type": "report",
+      "spec_version": "2.1",
+      "id": "report--2cc34d28-eb97-45d4-827a-45cff28db506",
+      "created": "2025-12-30T15:00:00Z",
+      "modified": "2025-12-30T15:00:00Z",
+      "name": "Silver Falcon Threat Group Profile",
+      "description": "Intelligence profile on the Silver Falcon threat actor group, their campaigns, tools, and associated intrusion sets.",
+      "report_types": [
+        "threat-actor"
+      ],
+      "published": "2025-12-30T00:00:00Z",
+      "object_refs": [
+        "threat-actor--b78b1d19-dd0c-48c5-8065-c227fa48c9c6",
+        "campaign--bfe30c78-817f-4102-891b-3326a721899b",
+        "attack-pattern--959cc688-af51-474f-856c-b304f2f0de18",
+        "malware--11a84e4d-0a85-40ec-8a3b-1714be404018",
+        "malware--fd0f43cf-01f1-4bc7-bf8a-0b2f4508d5e2",
+        "intrusion-set--1bfedb60-e7e1-4fa8-be14-b4baafc4c9dc",
+        "threat-actor--02b27e4b-9cbf-4ae5-8a44-d4e57b05ba07",
+        "identity--59d56334-d721-42c1-b2e5-6f7e00d417a6",
+        "attack-pattern--64393411-22c4-4bd7-b119-8e8d58312ab8",
+        "malware--8e08615a-db42-4b50-947e-f23ce951d7a0",
+        "identity--51370f9a-4e84-4406-bafc-6b7db813a9fa",
+        "infrastructure--9f1bcac4-506b-4815-b443-8846a0afb826",
+        "campaign--90b69409-be42-43ef-af54-4f0a96899221"
+      ]
+    },
+    {
+      "type": "sighting",
+      "spec_version": "2.1",
+      "id": "sighting--be8402fa-4188-4975-9cc1-8326822d585e",
+      "created": "2024-08-01T00:00:00Z",
+      "modified": "2024-08-01T00:00:00Z",
+      "sighting_of_ref": "indicator--e1cb55a9-4097-47bb-b0a7-492ee3c05e43",
+      "where_sighted_refs": [
+        "identity--59d56334-d721-42c1-b2e5-6f7e00d417a6"
+      ],
+      "first_seen": "2024-07-20T00:00:00Z",
+      "last_seen": "2024-07-20T12:00:00Z",
+      "count": 5,
+      "description": "EnergeticWind Corp observed the suspected C2 IP on their network during the campaign."
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--09eb99c2-c4b8-4fa5-acf0-4506578fb01d",
+      "created": "2024-01-01T00:00:00Z",
+      "modified": "2024-01-01T00:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--b78b1d19-dd0c-48c5-8065-c227fa48c9c6",
+      "target_ref": "attack-pattern--64393411-22c4-4bd7-b119-8e8d58312ab8",
+      "confidence": 80
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--23baf2b2-ccc0-4ada-afa3-3befffd327fc",
+      "created": "2024-01-15T09:30:00Z",
+      "modified": "2024-01-15T09:30:00Z",
+      "relationship_type": "uses",
+      "source_ref": "intrusion-set--1bfedb60-e7e1-4fa8-be14-b4baafc4c9dc",
+      "target_ref": "malware--fd0f43cf-01f1-4bc7-bf8a-0b2f4508d5e2",
+      "confidence": 70
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--2e5ba55c-9621-47db-b4c6-ef9aad3e6249",
+      "created": "2024-02-01T08:00:00Z",
+      "modified": "2024-02-01T08:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "intrusion-set--1bfedb60-e7e1-4fa8-be14-b4baafc4c9dc",
+      "target_ref": "infrastructure--9f1bcac4-506b-4815-b443-8846a0afb826",
+      "confidence": 50
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--0994448b-92a1-4411-bb84-268392c06325",
+      "created": "2024-01-15T09:00:00Z",
+      "modified": "2024-01-15T09:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "campaign--bfe30c78-817f-4102-891b-3326a721899b",
+      "target_ref": "attack-pattern--64393411-22c4-4bd7-b119-8e8d58312ab8",
+      "confidence": 80
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--871cdb3a-ac80-4d83-8dee-244aac6bdc9c",
+      "created": "2024-01-15T09:30:00Z",
+      "modified": "2024-01-15T09:30:00Z",
+      "relationship_type": "uses",
+      "source_ref": "campaign--bfe30c78-817f-4102-891b-3326a721899b",
+      "target_ref": "malware--fd0f43cf-01f1-4bc7-bf8a-0b2f4508d5e2",
+      "confidence": 80
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--a96fee62-e038-45fe-b9ee-49b20646de64",
+      "created": "2024-01-20T10:00:00Z",
+      "modified": "2024-01-20T10:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "campaign--bfe30c78-817f-4102-891b-3326a721899b",
+      "target_ref": "malware--11a84e4d-0a85-40ec-8a3b-1714be404018",
+      "confidence": 80
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--2b8210ab-5da0-4757-95f0-d6ce1c49c329",
+      "created": "2024-05-01T11:00:00Z",
+      "modified": "2024-05-01T11:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "campaign--bfe30c78-817f-4102-891b-3326a721899b",
+      "target_ref": "malware--8e08615a-db42-4b50-947e-f23ce951d7a0",
+      "confidence": 80
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--dd382e27-df62-44df-aaa3-2ef18506a287",
+      "created": "2025-06-01T09:00:00Z",
+      "modified": "2025-06-01T09:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "campaign--90b69409-be42-43ef-af54-4f0a96899221",
+      "target_ref": "attack-pattern--959cc688-af51-474f-856c-b304f2f0de18",
+      "confidence": 80
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--e47c9ca1-a90f-4cfc-a4dd-b7a69758fbe8",
+      "created": "2025-06-01T09:05:00Z",
+      "modified": "2025-06-01T09:05:00Z",
+      "relationship_type": "uses",
+      "source_ref": "campaign--90b69409-be42-43ef-af54-4f0a96899221",
+      "target_ref": "malware--11a84e4d-0a85-40ec-8a3b-1714be404018",
+      "confidence": 90
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--50907141-d817-442f-9bc1-b43b7854988f",
+      "created": "2025-01-01T00:00:00Z",
+      "modified": "2025-01-01T00:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--b78b1d19-dd0c-48c5-8065-c227fa48c9c6",
+      "target_ref": "malware--11a84e4d-0a85-40ec-8a3b-1714be404018",
+      "confidence": 90
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--93e57ace-5a2a-45a7-9d43-e57f2b258e90",
+      "created": "2024-07-01T10:00:00Z",
+      "modified": "2024-07-01T10:00:00Z",
+      "relationship_type": "indicates",
+      "source_ref": "indicator--56170111-5135-40fc-a239-ae72fd947a59",
+      "target_ref": "malware--fd0f43cf-01f1-4bc7-bf8a-0b2f4508d5e2",
+      "confidence": 90
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--a2258884-2894-4a1e-9683-6ef4b21b32f7",
+      "created": "2024-07-01T10:00:00Z",
+      "modified": "2024-07-01T10:00:00Z",
+      "relationship_type": "indicates",
+      "source_ref": "indicator--56170111-5135-40fc-a239-ae72fd947a59",
+      "target_ref": "malware--8e08615a-db42-4b50-947e-f23ce951d7a0",
+      "confidence": 90
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--eff13a8d-16c0-424b-bbcb-a1b86587525e",
+      "created": "2024-07-01T10:05:00Z",
+      "modified": "2024-07-01T10:05:00Z",
+      "relationship_type": "indicates",
+      "source_ref": "indicator--e1cb55a9-4097-47bb-b0a7-492ee3c05e43",
+      "target_ref": "campaign--bfe30c78-817f-4102-891b-3326a721899b",
+      "confidence": 50
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--e4c15b13-a49a-4c32-b8a4-d1bafb7bd07c",
+      "created": "2024-07-10T12:00:00Z",
+      "modified": "2024-07-10T12:00:00Z",
+      "relationship_type": "indicates",
+      "source_ref": "indicator--50cad00d-23f2-4cf4-8cbc-d9675fdcc58d",
+      "target_ref": "malware--8e08615a-db42-4b50-947e-f23ce951d7a0",
+      "confidence": 95
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--ee08404d-fc34-49da-aa8f-6ac0f07d6d75",
+      "created": "2024-01-20T10:00:00Z",
+      "modified": "2024-01-20T10:00:00Z",
+      "relationship_type": "delivers",
+      "source_ref": "malware--fd0f43cf-01f1-4bc7-bf8a-0b2f4508d5e2",
+      "target_ref": "malware--11a84e4d-0a85-40ec-8a3b-1714be404018",
+      "confidence": 90
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--517d0066-a690-40cd-9e2a-e10ab37d2f7f",
+      "created": "2024-05-01T11:00:00Z",
+      "modified": "2024-05-01T11:00:00Z",
+      "relationship_type": "drops",
+      "source_ref": "malware--11a84e4d-0a85-40ec-8a3b-1714be404018",
+      "target_ref": "malware--8e08615a-db42-4b50-947e-f23ce951d7a0",
+      "confidence": 80
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--679ec96e-bd0e-444e-a96f-bc009e61a539",
+      "created": "2024-06-01T08:30:00Z",
+      "modified": "2024-06-01T08:30:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "threat-actor--b78b1d19-dd0c-48c5-8065-c227fa48c9c6",
+      "target_ref": "intrusion-set--1bfedb60-e7e1-4fa8-be14-b4baafc4c9dc",
+      "confidence": 70
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--9802f7ea-f002-41dc-a8a3-31eb36d59af9",
+      "created": "2024-06-01T08:30:00Z",
+      "modified": "2024-06-01T08:30:00Z",
+      "relationship_type": "related-to",
+      "source_ref": "intrusion-set--1bfedb60-e7e1-4fa8-be14-b4baafc4c9dc",
+      "target_ref": "threat-actor--b78b1d19-dd0c-48c5-8065-c227fa48c9c6",
+      "confidence": 70
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--6a57c619-3dd5-45f4-b8c8-b331a7f4b7bd",
+      "created": "2024-06-01T08:30:00Z",
+      "modified": "2024-06-01T08:30:00Z",
+      "relationship_type": "attributed-to",
+      "source_ref": "intrusion-set--1bfedb60-e7e1-4fa8-be14-b4baafc4c9dc",
+      "target_ref": "threat-actor--b78b1d19-dd0c-48c5-8065-c227fa48c9c6",
+      "confidence": 90
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--32a1cf5d-8baf-455b-841a-503900d7ef91",
+      "created": "2024-08-15T00:00:00Z",
+      "modified": "2024-08-15T00:00:00Z",
+      "relationship_type": "attributed-to",
+      "source_ref": "campaign--bfe30c78-817f-4102-891b-3326a721899b",
+      "target_ref": "intrusion-set--1bfedb60-e7e1-4fa8-be14-b4baafc4c9dc",
+      "confidence": 85
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--057b01dc-8182-4aa1-a578-99ed848e4e7f",
+      "created": "2024-08-20T00:00:00Z",
+      "modified": "2024-08-20T00:00:00Z",
+      "relationship_type": "attributed-to",
+      "source_ref": "campaign--bfe30c78-817f-4102-891b-3326a721899b",
+      "target_ref": "threat-actor--02b27e4b-9cbf-4ae5-8a44-d4e57b05ba07",
+      "confidence": 30
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--ccb12120-819a-4c88-a9f3-6663a9182891",
+      "created": "2025-12-15T00:00:00Z",
+      "modified": "2025-12-15T00:00:00Z",
+      "relationship_type": "attributed-to",
+      "source_ref": "campaign--90b69409-be42-43ef-af54-4f0a96899221",
+      "target_ref": "threat-actor--b78b1d19-dd0c-48c5-8065-c227fa48c9c6",
+      "confidence": 90
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--1065e988-4bb6-4f90-9540-954399a91861",
+      "created": "2024-06-01T09:00:00Z",
+      "modified": "2024-06-01T09:00:00Z",
+      "relationship_type": "mitigates",
+      "source_ref": "course-of-action--2ce0e5fa-902d-4ff6-88fc-f80b52604eaa",
+      "target_ref": "attack-pattern--64393411-22c4-4bd7-b119-8e8d58312ab8",
+      "confidence": 100
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--6c5b85fc-9251-447a-b3a6-b9a74bea253f",
+      "created": "2024-09-01T09:00:00Z",
+      "modified": "2024-09-01T09:00:00Z",
+      "relationship_type": "mitigates",
+      "source_ref": "course-of-action--93d19a48-6bff-4dac-b29a-acb23a26b425",
+      "target_ref": "malware--8e08615a-db42-4b50-947e-f23ce951d7a0",
+      "confidence": 90
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--c9ff1052-19ba-4591-bc2f-216187161aa1",
+      "created": "2024-01-15T00:00:00Z",
+      "modified": "2024-01-15T00:00:00Z",
+      "relationship_type": "targets",
+      "source_ref": "campaign--bfe30c78-817f-4102-891b-3326a721899b",
+      "target_ref": "identity--59d56334-d721-42c1-b2e5-6f7e00d417a6",
+      "confidence": 90
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--522f97f2-ab9f-44dc-b845-0fb6fa34166b",
+      "created": "2025-06-01T00:00:00Z",
+      "modified": "2025-06-01T00:00:00Z",
+      "relationship_type": "targets",
+      "source_ref": "campaign--90b69409-be42-43ef-af54-4f0a96899221",
+      "target_ref": "identity--51370f9a-4e84-4406-bafc-6b7db813a9fa",
+      "confidence": 90
+    }
+  ]
+}
