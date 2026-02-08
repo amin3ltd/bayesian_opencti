@@ -10,38 +10,89 @@ This project implements a Bayesian network-based confidence scoring system for O
 - **OpenCTI Integration**: Polls OpenCTI for changes and pushes updated confidence scores back.
 - **Configurable**: Extensive configuration via `config/bayes.yaml` for relation weights, time decay, smoothing, etc.
 
+## Prerequisites
+
+- Python 3.8+
+- An OpenCTI instance (local or remote)
+- Git
+
 ## Installation
 
-1. Clone the repository.
-2. Install dependencies: `pip install -r requirements.txt`
-3. Set up environment variables in `.env` (see `.env.example`):
+### Option 1: Direct Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/amin3ltd/bayesian_opencti.git
+   cd bayesian_opencti
+   ```
+
+2. **Create a virtual environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your OpenCTI credentials
+   ```
+   
+   Required environment variables:
    - `OPENCTI_URL`: Your OpenCTI instance URL
-   - `OPENCTI_TOKEN`: API token
-   - `LOG_LEVEL`: Logging level (INFO, DEBUG, etc.)
-   - `POLL_INTERVAL_SECONDS`: Polling interval
+   - `OPENCTI_TOKEN`: API token for authentication
+   - `LOG_LEVEL`: Logging level (INFO, DEBUG, WARNING, ERROR)
+   - `POLL_INTERVAL_SECONDS`: Polling interval in seconds
    - `MAX_PARENTS_PER_NODE`: Max parents per node in the Bayesian network
-4. Configure Bayesian parameters in `config/bayes.yaml`.
-5. Run: `python run.py`
 
-## Configuration
+5. **Configure Bayesian parameters**
+   Edit `config/bayes.yaml` to customize:
+   - `lbp_damping`: Damping factor for cyclic SCC fixed-point (0-1)
+   - `lbp_epsilon`: Convergence threshold
+   - `lbp_max_iters`: Max iterations for fixed-point
+   - `rel_type_weight`: Weights for different relationship types
+   - `default_rel_weight`: Fallback weight
+   - `ema_alpha`: Exponential moving average alpha for smoothing
+   - `confidence_push_delta_min`: Min change to push updates
+   - `time_decay_half_life`: Half-lives for time decay by entity type
 
-### `config/bayes.yaml`
+6. **Run the application**
+   ```bash
+   python run.py
+   ```
 
-- `lbp_damping`: Damping factor for cyclic SCC fixed-point (0-1)
-- `lbp_epsilon`: Convergence threshold
-- `lbp_max_iters`: Max iterations for fixed-point
-- `rel_type_weight`: Weights for different relationship types
-- `default_rel_weight`: Fallback weight
-- `ema_alpha`: Exponential moving average alpha for smoothing
-- `confidence_push_delta_min`: Min change to push updates
-- `time_decay_half_life`: Half-lives for time decay by entity type
-- `rel_conf_fallback`: Fallback confidence for relationships
-- `report_object_min`: Min confidence for report-object links
+### Option 2: Docker Deployment
 
-### Dashboard
+1. **Clone and navigate to the project**
+   ```bash
+   git clone https://github.com/amin3ltd/bayesian_opencti.git
+   cd bayesian_opencti/docker
+   ```
 
-- Accessible at `http://localhost:5000`
-- Graph view with confidence-based coloring
+2. **Configure environment**
+   ```bash
+   cp .env.sample .env
+   # Edit .env with your configuration
+   ```
+
+3. **Start services**
+   ```bash
+   docker-compose up -d
+   ```
+
+## Access
+
+- **Dashboard**: http://localhost:5000
+- **API**: http://localhost:5000/api
+
+## Dashboard Features
+
+- Interactive graph visualization with confidence-based coloring
 - Node details on click: priors, posteriors, contributions, paths
 - History sparkline for confidence evolution
 - Recompute button to force full inference
@@ -55,10 +106,25 @@ This project implements a Bayesian network-based confidence scoring system for O
 
 ## Testing
 
-Run tests: `pytest tests/`
+```bash
+pytest tests/
+```
 
-## Requirements
+## Configuration Reference
 
-- Python 3.8+
-- OpenCTI instance
-- Dependencies in `requirements.txt`
+### `config/bayes.yaml`
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `lbp_damping` | Damping factor for cyclic SCC | 0.5 |
+| `lbp_epsilon` | Convergence threshold | 1e-6 |
+| `lbp_max_iters` | Max fixed-point iterations | 100 |
+| `rel_type_weight` | Weights by relationship type | - |
+| `default_rel_weight` | Default edge weight | 0.5 |
+| `ema_alpha` | Smoothing factor | 0.3 |
+| `confidence_push_delta_min` | Min delta to push | 0.01 |
+| `time_decay_half_life` | Time decay by entity type | - |
+
+## License
+
+MIT License
