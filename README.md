@@ -235,17 +235,81 @@ Graph/posterior validation:
 - Self-loops: 0
 - Edge weights out of range: 0
 
-## Additional validation techniques (recommended)
+## Additional validation techniques (step-by-step)
 
 These techniques are not fully automated in the current scripts but are useful
-for research-grade validation:
+for research-grade validation. Each procedure below outlines how to execute it.
 
-- **Reliability diagrams**: compare predicted confidence vs. observed accuracy.
-- **Sensitivity analysis**: perturb priors/weights to measure output stability.
-- **Temporal stability**: detect oscillations or drift in confidence history.
-- **Cross-source agreement**: compare with external feeds (MISP, VT, OTX).
-- **Ablation studies**: measure impact of removing edge types or time decay.
-- **Holdout evaluation**: use labeled outcomes when available for calibration.
+### 1) Reliability diagrams (calibration curves)
+
+Purpose: compare predicted confidence vs. observed accuracy.
+
+Steps:
+1. Collect a dataset of predictions `p_i` and binary outcomes `y_i`.
+2. Bin predictions into confidence buckets (e.g., 0-0.1, 0.1-0.2, ...).
+3. For each bin, compute:
+   - mean confidence (avg of `p_i`)
+   - empirical accuracy (avg of `y_i`)
+4. Plot mean confidence (x) vs. accuracy (y).
+5. Measure gap to diagonal as calibration error (ECE/MCE).
+
+Implementation hint:
+- Use `validation.calibration.expected_calibration_error` for ECE/MCE.
+- For plots, use `sklearn.calibration.calibration_curve`.
+
+### 2) Sensitivity analysis (robustness)
+
+Purpose: evaluate stability under parameter changes.
+
+Steps:
+1. Choose parameters to perturb (priors, edge weights, damping, epsilon).
+2. Create multiple perturbed configurations (e.g., ±5–10%).
+3. Run inference for each configuration.
+4. Measure output deltas per node (max/mean absolute change).
+5. Identify nodes that are sensitive to parameter changes.
+
+### 3) Temporal stability (drift detection)
+
+Purpose: ensure confidence does not oscillate unrealistically over time.
+
+Steps:
+1. Collect confidence history via `/api/v1/history`.
+2. Compute per-node deltas and rolling variance.
+3. Flag nodes with sudden jumps or frequent reversals.
+4. Compare against data update timestamps and event changes.
+
+### 4) Cross-source agreement
+
+Purpose: compare model confidence with external feeds (MISP, VT, OTX).
+
+Steps:
+1. Map indicators/entities to external sources (IDs, hashes, domains, IPs).
+2. Fetch external scores or labels (reputation, detections).
+3. Normalize external scores to [0,1] if needed.
+4. Compute correlation or disagreement rate against model confidence.
+5. Investigate large discrepancies.
+
+### 5) Ablation studies
+
+Purpose: quantify the contribution of model components.
+
+Steps:
+1. Define baseline configuration (full model).
+2. Remove or disable one component at a time (e.g., time decay, a relation type).
+3. Re-run inference and compare outputs to baseline.
+4. Measure change in accuracy (if labels exist) or output deviation.
+5. Document impact for each ablation.
+
+### 6) Holdout evaluation (ground-truth labels)
+
+Purpose: measure calibration and discrimination with labeled data.
+
+Steps:
+1. Split labeled data into train/validation (or time-based holdout).
+2. Use train data for tuning priors/weights.
+3. Run inference on the holdout set.
+4. Compute Brier score, ECE, AUC-ROC, and PR-AUC.
+5. If needed, calibrate with Platt/Isotonic and re-evaluate.
 
 ## Assumptions and limitations
 
