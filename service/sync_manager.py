@@ -54,9 +54,10 @@ class SyncManager:
         }
 
         for o in objs:
-            ntype = o.get('type','')
+            ntype = o.get('type', '')
             # Use confidence from data if available, else default prior based on type
-            prior_pct = o.get('confidence', default_priors.get(ntype, 50))
+            raw_confidence = o.get('confidence')
+            prior_pct = default_priors.get(ntype, 50) if raw_confidence is None else raw_confidence
             self.bayes.add_or_update_node(o['id'], ntype or 'Unknown', o.get('name', o['id']), prior_pct)
 
         for r in rels:

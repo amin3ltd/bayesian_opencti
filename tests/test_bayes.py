@@ -155,12 +155,13 @@ class TestBayesianModel:
         m.add_or_update_edge("B", "C", 50)
         probs = m.infer_all()
         
-        # A should stay at prior
-        assert abs(probs["A"] - 0.8) < 0.01
-        # B should increase from evidence
-        assert 0.28 < probs["B"] < 0.29
-        # C should be affected by B
-        assert 0.21 < probs["C"] < 0.22
+        expected_a = 0.8
+        expected_b = 1.0 - (1.0 - 0.2) * (1.0 - 0.7 * expected_a)
+        expected_c = 1.0 - (1.0 - 0.3) * (1.0 - 0.5 * expected_b)
+
+        assert probs["A"] == pytest.approx(expected_a, rel=1e-3)
+        assert probs["B"] == pytest.approx(expected_b, rel=1e-3)
+        assert probs["C"] == pytest.approx(expected_c, rel=1e-3)
 
     def test_cyclic_network(self):
         """Test cyclic network convergence."""
@@ -171,12 +172,13 @@ class TestBayesianModel:
         m.add_or_update_edge("B", "A", 60)
         probs = m.infer_all()
         
-        # Symmetric cycle should converge near prior
-        assert abs(probs["A"] - 0.5) < 0.01
-        assert abs(probs["B"] - 0.5) < 0.01
+        # Symmetric cycle converges to fixed point for Noisy-OR
+        expected = 0.5 / 0.7
+        assert probs["A"] == pytest.approx(expected, rel=1e-3)
+        assert probs["B"] == pytest.approx(expected, rel=1e-3)
 
     def test_warm_start_preserves_belief(self):
-        """Test that beliefs persist between inference calls."""
+        """Test that exact updates are deterministic across runs."""
         m = BayesianConfidenceModel()
         m.add_or_update_node("A", "Indicator", "A", 50)
         m.add_or_update_node("B", "Malware", "B", 50)
@@ -191,8 +193,8 @@ class TestBayesianModel:
         # Second inference
         probs2 = m.infer_all()
         
-        # B should have updated belief
-        assert probs2["B"] > probs1["B"]
+        # Exact updates for DAGs should be stable regardless of warm start
+        assert probs2["B"] == pytest.approx(probs1["B"])
 
 
 class TestGraphExport:

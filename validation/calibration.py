@@ -266,7 +266,8 @@ def validate_bounds(values: List[float]) -> Tuple[bool, List[str]]:
 
 def validate_monotonicity(
     timestamps: List[str],
-    values: List[float]
+    values: List[float],
+    max_jump: float = 0.4
 ) -> Tuple[bool, List[str]]:
     """
     Check for unexpected value changes.
@@ -274,6 +275,7 @@ def validate_monotonicity(
     Args:
         timestamps: ISO8601 timestamps
         values: Confidence scores
+        max_jump: Maximum allowed absolute change between points
     
     Returns:
         Tuple of (is_valid, list of anomalies)
@@ -284,7 +286,7 @@ def validate_monotonicity(
     issues = []
     for i in range(1, len(values)):
         change = abs(values[i] - values[i - 1])
-        if change > 0.5:  # Large jump
+        if change >= max_jump:  # Large jump
             issues.append(
                 f"Large change at {timestamps[i]}: "
                 f"{values[i-1]:.2f} -> {values[i]:.2f}"
