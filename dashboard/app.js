@@ -1,9 +1,11 @@
 /* ---------------- Professional Bayesian Graph Frontend ---------------- */
 const statusEl = document.getElementById('status');
+const lastUpdatedEl = document.getElementById('last-updated');
 const nodeSummaryEl = document.getElementById('node-summary-content');
 const contribsEl = document.getElementById('contribs-content');
 const pathsEl = document.getElementById('paths-content');
 const searchEl = document.getElementById('search');
+const clearSearchBtn = document.getElementById('clear-search');
 const fitBtn = document.getElementById('fit');
 const refreshBtn = document.getElementById('refresh');
 const recomputeBtn = document.getElementById('recompute');
@@ -16,6 +18,11 @@ const histCanvas = document.getElementById('hist-canvas');
 const histCaption = document.getElementById('hist-caption');
 
 function setStatus(msg){ statusEl.textContent = msg || ''; }
+function setLastUpdated(){
+  if(!lastUpdatedEl) return;
+  const now = new Date();
+  lastUpdatedEl.textContent = `Updated: ${now.toLocaleTimeString()}`;
+}
 
 /* ---------------- Theme-aware palette ---------------- */
 const getCSSVar = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -165,6 +172,7 @@ async function fetchNetwork(){
     cy.nodes().forEach(n=>refreshNodeAppearance(n));
     cy.layout({name:'cose',animate:false}).run();
     setStatus(`Ready — ${nodes.length} nodes, ${edges.length} edges`);
+    setLastUpdated();
   }catch(e){ setStatus('Failed to load network: '+e.message); console.error(e);}
 }
 
@@ -177,6 +185,7 @@ function applyUpdates(evt){
     node.data('posterior', clamp(Number(u.new||0)/100,0,0.99));
     refreshNodeAppearance(node);
   });
+  setLastUpdated();
 }
 
 /* ---------------- Node click panel ---------------- */
@@ -269,8 +278,8 @@ function hookEvents(){
     onNodeClick(node.id());
   });
 
-  searchEl.addEventListener('input',()=>{
-    const q = (searchEl.value||'').trim().toLowerCase();
+  const applySearchFilter = value => {
+    const q = (value || '').trim().toLowerCase();
     cy.nodes().forEach(n=>{
       const m = (n.data('label')||'').toLowerCase().includes(q) || n.id().toLowerCase().includes(q);
       n.style('opacity', q ? (m?1:0.12) : 1);
@@ -278,7 +287,16 @@ function hookEvents(){
     if(q){
       const first = cy.nodes().filter(n=>(n.data('label')||'').toLowerCase().includes(q)||n.id().toLowerCase().includes(q))[0];
       if(first) selectAndFocus(first.id());
+    }else{
+      cy.$(':selected').unselect();
     }
+  };
+
+  searchEl.addEventListener('input',()=>applySearchFilter(searchEl.value));
+  clearSearchBtn.addEventListener('click',()=>{
+    searchEl.value = '';
+    applySearchFilter('');
+    searchEl.focus();
   });
 
   fitBtn.addEventListener('click', ()=>cy.fit(50));

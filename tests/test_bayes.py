@@ -4,6 +4,8 @@ Tests inference, edge handling, and validation.
 """
 
 import pytest
+
+pytestmark = pytest.mark.unit
 from bayes.model import BayesianConfidenceModel, clamp01, NodeInfo
 
 

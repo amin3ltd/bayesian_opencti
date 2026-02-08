@@ -3,6 +3,8 @@ Integration tests for SyncManager and OpenCTI client.
 """
 
 import pytest
+
+pytestmark = pytest.mark.integration
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timezone, timedelta
 from bayes.model import BayesianConfidenceModel

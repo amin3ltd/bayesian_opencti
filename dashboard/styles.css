@@ -160,7 +160,7 @@ main {
   border: 1px solid var(--border);
   border-radius: 6px;
 }
-#fit, #refresh, #recompute, #export {
+#fit, #refresh, #recompute, #export, #clear-search {
   padding: 6px 10px;
   background: var(--panel);
   color: var(--text);
@@ -169,7 +169,7 @@ main {
   cursor: pointer;
   transition: background 0.2s;
 }
-#fit:hover, #refresh:hover, #recompute:hover, #export:hover { background: var(--hover); }
+#fit:hover, #refresh:hover, #recompute:hover, #export:hover, #clear-search:hover { background: var(--hover); }
 
 .legend {
   margin-left: auto;

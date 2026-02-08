@@ -3,6 +3,8 @@ Tests for validation and calibration module.
 """
 
 import pytest
+
+pytestmark = pytest.mark.unit
 import numpy as np
 from validation.calibration import (
     brier_score,

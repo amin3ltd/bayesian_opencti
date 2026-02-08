@@ -3,6 +3,8 @@ API endpoint tests for Flask server.
 """
 
 import pytest
+
+pytestmark = pytest.mark.integration
 from unittest.mock import Mock, patch
 from bayes.model import BayesianConfidenceModel
 from service.eventbus import EventBus

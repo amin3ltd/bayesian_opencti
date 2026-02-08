@@ -87,6 +87,16 @@ cp .env.sample .env
 docker-compose up -d
 ```
 
+### Conda (optional)
+
+```bash
+conda create -n bayesian-opencti python=3.11
+conda activate bayesian-opencti
+pip install -r requirements.txt
+cp .env.example .env
+python run.py
+```
+
 ### Access
 
 - Dashboard: http://localhost:5000
@@ -123,14 +133,40 @@ YAML parameters in `config/bayes.yaml`:
 ## UI (dashboard)
 
 - Search by label or ID
+- Clear search and restore view
 - Fit/Refresh/Recompute actions
 - Graph export to JSON
 - Theme toggle (light/dark)
+- Last update timestamp
 - Parent contributions, evidence paths, and history chart
 
 ## Testing and validation (full procedure)
 
-### 1) Unit and integration tests
+### 1) Unit tests
+
+Fast, isolated tests for inference and validation utilities.
+
+```bash
+python3 -m pytest -m unit
+```
+
+### 2) Integration tests
+
+Tests that combine multiple modules (SyncManager + API surfaces).
+
+```bash
+python3 -m pytest -m integration
+```
+
+### 3) End-to-end (E2E) tests
+
+End-to-end API flows using a real SyncManager and the Flask test client.
+
+```bash
+python3 -m pytest -m e2e
+```
+
+### 4) Full suite (recommended)
 
 ```bash
 python3 -m pytest
@@ -138,7 +174,7 @@ python3 -m pytest
 
 Result (latest): **77 passed**
 
-### 2) Data validation procedure
+### 5) Data validation procedure
 
 ```bash
 python3 scripts/validate_sample_data.py
@@ -148,12 +184,18 @@ What it checks:
 - STIX 2.1 parse validation for each object.
 - Confidence bounds: numeric and within [0, 100].
 
-### 3) Result validation procedure (calibration)
+### 6) Result validation procedure (calibration)
 
 The same script performs calibration using proxy labels derived from sightings:
 `outcome = 1` if an entity is referenced by `sighting_of_ref` or
-`where_sighted_refs`, else `0`. This is a sparse proxy signal and should be
-interpreted as a sanity check rather than ground-truth calibration.
+`where_sighted_refs`, else `0`. The workflow is:
+
+1. Collect confidence predictions from non-relationship objects.
+2. Build proxy outcomes from sightings.
+3. Validate inputs and compute summary metrics (Brier, ECE, MCE).
+
+This is a sparse proxy signal and should be interpreted as a sanity check rather
+than ground-truth calibration.
 
 ## Validation outcomes (sample_data.json)
 
