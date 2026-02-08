@@ -90,7 +90,118 @@ This project implements a Bayesian network-based confidence scoring system for O
 - **Dashboard**: http://localhost:5000
 - **API**: http://localhost:5000/api
 
-## Dashboard Features
+## Data Validation
+
+This section documents how data is validated and processed from OpenCTI.
+
+### Supported Entity Types
+
+| Entity Type | Default Prior (%) | Description |
+|-------------|-------------------|-------------|
+| `Indicator` | 70 | Observable indicators of compromise |
+| `Malware` | 50 | Malware families and instances |
+| `Threat-Actor` | 60 | Threat actor groups and individuals |
+| `Campaign` | 55 | Named campaigns |
+| `Intrusion-Set` | 55 | Intrusion sets |
+| `Attack-Pattern` | 65 | MITRE ATT&CK patterns |
+| `Report` | 80 | Threat reports (authoritative) |
+| `Identity` | 75 | Organizations and individuals |
+| `Infrastructure` | 45 | C2 and other infrastructure |
+| `Course-of-Action` | 85 | Mitigation and response actions |
+
+### Confidence Values
+
+- **Input Range**: 0-100 (integer percentage)
+- **Internal Range**: 0.0-1.0 (floating point)
+- **Clamping**: Values are clamped to [ε, 1-ε] where ε = 1e-9 to avoid numerical instability
+
+### Supported Relationship Types
+
+| Relationship Type | Default Weight | Description |
+|------------------|----------------|-------------|
+| `indicates` | 0.85 | Indicator points to entity |
+| `attributed-to` | 0.65 | Attribution to actor/threat group |
+| `uses` | 0.35 | Entity uses another (e.g., malware uses infrastructure) |
+| `targets` | 0.45 | Entity targets a victim |
+| `object` | 0.50 | Report contains object reference |
+| `delivers` | 0.50 | Malware delivery relationship |
+
+### Relationship Validation Rules
+
+1. **Self-loops are rejected**: Relationships where `source_ref == target_ref` are ignored
+2. **Parent cap enforcement**: Each node has a maximum of `MAX_PARENTS_PER_NODE` incoming edges (default: 5). The strongest parents are retained based on edge weights
+3. **Missing nodes**: Edges referencing non-existent nodes are skipped
+4. **Weight calculation**: Edge weights = `relationship_confidence × type_weight`
+
+### Time Decay Configuration
+
+Confidence values decay over time based on entity type. Configure in `config/bayes.yaml`:
+
+```yaml
+time_decay_half_life:
+  Indicator: 60      # Days
+  Report: 90
+  Malware: 180
+  Intrusion-Set: 240
+  Threat-Actor-Individual: 240
+```
+
+The decay formula: `confidence = original × 0.5^(age_days / half_life)`
+
+### Data Input Format (STIX 2.1)
+
+The system accepts STIX 2.1 bundle format:
+
+```json
+{
+  "type": "bundle",
+  "id": "bundle--uuid",
+  "objects": [
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--uuid",
+      "created": "2024-01-15T12:00:00Z",
+      "modified": "2024-01-15T12:00:00Z",
+      "name": "Malicious Domain",
+      "confidence": 80
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--uuid",
+      "relationship_type": "indicates",
+      "source_ref": "indicator--uuid",
+      "target_ref": "malware--uuid",
+      "confidence": 70
+    }
+  ]
+}
+```
+
+### Validation Pipeline
+
+```
+OpenCTI API Response
+        ↓
+[Fetch STIX Objects & Relationships]
+        ↓
+[Validate required fields (id, type, name)]
+        ↓
+[Apply default priors by entity type]
+        ↓
+[Build directed graph (skip invalid edges)]
+        ↓
+[Apply parent cap (top-k strongest)]
+        ↓
+[Run Bayesian inference (Noisy-OR + LBP)]
+        ↓
+[Apply time decay (if timestamp available)]
+        ↓
+[Push confidence updates to OpenCTI]
+```
+
+### Dashboard Features
 
 - Interactive graph visualization with confidence-based coloring
 - Node details on click: priors, posteriors, contributions, paths
@@ -110,19 +221,25 @@ This project implements a Bayesian network-based confidence scoring system for O
 pytest tests/
 ```
 
+### Test Coverage
+
+- **Small network**: Basic Noisy-OR inference with single parent
+- **Cyclic network**: Damped fixed-point convergence for cycles
+- **Chain network**: Multi-hop propagation through the graph
+
 ## Configuration Reference
 
 ### `config/bayes.yaml`
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `lbp_damping` | Damping factor for cyclic SCC | 0.5 |
-| `lbp_epsilon` | Convergence threshold | 1e-6 |
+| `lbp_damping` | Damping factor for cyclic SCC | 0.55 |
+| `lbp_epsilon` | Convergence threshold | 1e-4 |
 | `lbp_max_iters` | Max fixed-point iterations | 100 |
 | `rel_type_weight` | Weights by relationship type | - |
 | `default_rel_weight` | Default edge weight | 0.5 |
-| `ema_alpha` | Smoothing factor | 0.3 |
-| `confidence_push_delta_min` | Min delta to push | 0.01 |
+| `ema_alpha` | Smoothing factor | 0.35 |
+| `confidence_push_delta_min` | Min delta to push | 2 |
 | `time_decay_half_life` | Time decay by entity type | - |
 
 ## License
