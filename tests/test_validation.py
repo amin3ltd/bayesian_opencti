@@ -9,6 +9,8 @@ from validation.calibration import (
     expected_calibration_error,
     analyze_calibration,
     calibrate_confidence,
+    summarize_calibration,
+    validate_calibration_inputs,
     validate_bounds,
     validate_monotonicity,
 )
@@ -129,6 +131,69 @@ class TestCalibrateConfidence:
         
         assert calibrated == preds
         assert metrics["method"] == "none"
+
+
+class TestCalibrationInputValidation:
+    """Tests for calibration input validation."""
+
+    def test_valid_inputs(self):
+        """Test validation for correct inputs."""
+        preds = [0.1, 0.5, 0.9]
+        outcomes = [0, 1, 1]
+        is_valid, issues = validate_calibration_inputs(preds, outcomes)
+        assert is_valid is True
+        assert issues == []
+
+    def test_length_mismatch(self):
+        """Test detection of length mismatch."""
+        preds = [0.1, 0.2]
+        outcomes = [1]
+        is_valid, issues = validate_calibration_inputs(preds, outcomes)
+        assert is_valid is False
+        assert any("same length" in issue for issue in issues)
+
+    def test_out_of_bounds_prediction(self):
+        """Test detection of out-of-range predictions."""
+        preds = [1.2]
+        outcomes = [1]
+        is_valid, issues = validate_calibration_inputs(preds, outcomes)
+        assert is_valid is False
+        assert any("out of bounds" in issue for issue in issues)
+
+    def test_non_binary_outcome(self):
+        """Test detection of non-binary outcomes."""
+        preds = [0.2, 0.3]
+        outcomes = [0, 2]
+        is_valid, issues = validate_calibration_inputs(preds, outcomes)
+        assert is_valid is False
+        assert any("not binary" in issue for issue in issues)
+
+    def test_empty_inputs(self):
+        """Test detection of empty inputs."""
+        is_valid, issues = validate_calibration_inputs([], [])
+        assert is_valid is False
+        assert any("No samples" in issue for issue in issues)
+
+
+class TestCalibrationSummary:
+    """Tests for calibration summary output."""
+
+    def test_summary_values(self):
+        """Test summary aggregates."""
+        preds = [0.2, 0.8, 0.6, 0.4]
+        outcomes = [0, 1, 1, 0]
+        summary = summarize_calibration(preds, outcomes, n_bins=4)
+
+        assert summary.n_samples == 4
+        assert summary.positive_rate == pytest.approx(0.5)
+        assert summary.mean_confidence == pytest.approx(0.5)
+        assert summary.n_bins == 4
+
+    def test_summary_empty(self):
+        """Test summary for empty inputs."""
+        summary = summarize_calibration([], [], n_bins=5)
+        assert summary.n_samples == 0
+        assert summary.brier_score == pytest.approx(1.0)
 
 
 class TestValidateBounds:

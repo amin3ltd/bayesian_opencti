@@ -4,7 +4,7 @@ Integration tests for SyncManager and OpenCTI client.
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from bayes.model import BayesianConfidenceModel
 from service.sync_manager import SyncManager
 from service.eventbus import EventBus
@@ -89,6 +89,29 @@ class TestSyncManager:
         
         # Edge should use report prior * type_weight, minimum 30
         assert manager.bayes.G.has_edge('report-1', 'malware-1')
+
+    def test_relationship_type_from_stix_relationship(self):
+        """Test relationship_type is used when type=relationship."""
+        bus = MockEventBus()
+        cfg = {
+            'rel_type_weight': {'uses': 0.20},
+            'default_rel_weight': 0.90,
+        }
+        manager = SyncManager(max_parents=5, bus=bus, cfg=cfg)
+
+        objects = [
+            {'id': 'campaign-1', 'type': 'campaign', 'name': 'C1', 'confidence': 80},
+            {'id': 'malware-1', 'type': 'malware', 'name': 'M1', 'confidence': 50},
+        ]
+        relationships = [
+            {'source_ref': 'campaign-1', 'target_ref': 'malware-1',
+             'type': 'relationship', 'relationship_type': 'uses', 'confidence': 80},
+        ]
+
+        manager.build_from_opencti(objects, relationships)
+
+        w = manager.bayes.edge_w.get(('campaign-1', 'malware-1'))
+        assert w == pytest.approx(0.16)
     
     def test_inference_and_diff(self):
         """Test inference generates diffs."""
@@ -195,6 +218,26 @@ class TestTimeDecay:
         
         # Should be exactly original
         assert manager.last_conf.get('A') == 100
+
+    def test_decay_uses_modified_timestamp(self):
+        """Test decay applies when modified timestamp is present."""
+        bus = MockEventBus()
+        cfg = {
+            'time_decay_half_life': {'Indicator': 30},
+            'ema_alpha': 0.0,
+            'confidence_push_delta_min': 0,
+        }
+        manager = SyncManager(max_parents=5, bus=bus, cfg=cfg)
+
+        old_time = (datetime.now(timezone.utc) - timedelta(days=60)).isoformat()
+        objects = [
+            {'id': 'A', 'type': 'indicator', 'name': 'A', 'confidence': 100, 'modified': old_time}
+        ]
+
+        manager.build_from_opencti(objects, [])
+        manager.run_inference_and_diff()
+
+        assert manager.last_conf.get('A', 0) < 100
 
 
 class TestTypeWeight:

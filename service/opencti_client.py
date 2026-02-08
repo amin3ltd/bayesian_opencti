@@ -162,7 +162,7 @@ class OpenCTIClientWrapper:
                     objs.append({'id': it.get('id'),
                                  'type': it.get('entity_type') or t,
                                  'name': it.get('name') or it.get('standard_id') or it.get('id'),
-                                 'confidence': it.get('confidence') or 0,
+                                 'confidence': it.get('confidence'),
                                  'updated_at': it.get('updated_at'),
                                  'createdBy': (it.get('createdBy') or {}).get('id')})
             except Exception as ee:

@@ -20,15 +20,26 @@ class SyncManager:
         self.last_conf: Dict[str, int] = {}
         self._history: Dict[str, List[Tuple[float, int, int]]] = {}
         self._graph_cache = {'nodes': [], 'edges': []}
+        self._rel_type_weight = {
+            (k or '').strip().lower(): v
+            for k, v in (self.cfg.get('rel_type_weight') or {}).items()
+        }
+        self._half_life_by_type = {
+            (k or '').strip().lower(): v
+            for k, v in (self.cfg.get('time_decay_half_life') or {}).items()
+        }
+
+    @staticmethod
+    def _normalize_type(value: Optional[str]) -> str:
+        return (value or '').strip().lower()
 
     def _type_weight(self, r: str) -> float:
-        m = (self.cfg.get('rel_type_weight') or {}).get(r or '', None)
+        m = self._rel_type_weight.get(self._normalize_type(r), None)
         if m is None: m = self.cfg.get('default_rel_weight', 0.5)
         return max(0.0, min(1.0, float(m)))
 
     def _decay(self, val: int, ntype: str, updated_at: Optional[str]) -> int:
-        hl_map = self.cfg.get('time_decay_half_life') or {}
-        hl = hl_map.get(ntype, None)
+        hl = self._half_life_by_type.get(self._normalize_type(ntype), None)
         if not (hl and updated_at): return val
         try:
             t = datetime.fromisoformat(updated_at.replace('Z','+00:00'))
@@ -44,6 +55,7 @@ class SyncManager:
             'indicator': 70,  # Indicators start with moderate confidence
             'malware': 50,    # Malware needs evidence
             'threat-actor': 60,
+            'threat-actor-individual': 60,
             'campaign': 55,
             'intrusion-set': 55,
             'attack-pattern': 65,
@@ -55,13 +67,19 @@ class SyncManager:
 
         for o in objs:
             ntype = o.get('type', '')
+            ntype_key = self._normalize_type(ntype)
             # Use confidence from data if available, else default prior based on type
             raw_confidence = o.get('confidence')
-            prior_pct = default_priors.get(ntype, 50) if raw_confidence is None else raw_confidence
+            prior_pct = default_priors.get(ntype_key, 50) if raw_confidence is None else raw_confidence
+            updated_at = o.get('updated_at') or o.get('modified') or o.get('created')
+            prior_pct = self._decay(prior_pct, ntype_key, updated_at)
             self.bayes.add_or_update_node(o['id'], ntype or 'Unknown', o.get('name', o['id']), prior_pct)
 
         for r in rels:
-            s, d, t = r.get('source_ref'), r.get('target_ref'), r.get('type')
+            s = r.get('source_ref')
+            d = r.get('target_ref')
+            t = r.get('relationship_type') or r.get('type')
+            t_key = self._normalize_type(t)
             if not (s and d):
                 continue
 
@@ -69,7 +87,7 @@ class SyncManager:
             rel_conf_fallback = int(self.cfg.get('rel_conf_fallback', 50))    # applies when confidence is 0/None
             report_object_min = int(self.cfg.get('report_object_min', 30))    # floor for report "object" refs, in [0..100]
 
-            if t == 'object':
+            if t_key == 'object':
                 # Report -> object: use the report prior but don't let it drop below report_object_min
                 src = self.bayes.nodes.get(s)
                 src_prior_pct = int(round((src.prior if src else 0.6) * 100))
@@ -77,13 +95,14 @@ class SyncManager:
                 w = int(round(base * self._type_weight('object')))
             else:
                 # Normal relationships: if OpenCTI confidence is 0/None, fall back (e.g., 50)
-                if r.get('confidence') is None:
+                raw_confidence = r.get('confidence')
+                if raw_confidence is None:
                     base_rel = rel_conf_fallback
                 else:
-                    base_rel = int(r.get('confidence') or 0)
+                    base_rel = int(raw_confidence or 0)
                     if base_rel <= 0:
                         base_rel = rel_conf_fallback
-                w = int(round(base_rel * self._type_weight(t)))
+                w = int(round(base_rel * self._type_weight(t_key)))
 
             self.bayes.add_or_update_edge(s, d, w)
 

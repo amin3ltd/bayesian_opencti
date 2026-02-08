@@ -24,6 +24,49 @@ class CalibrationResult:
     calibration_difference: List[float]  # confidence - accuracy per bin
 
 
+@dataclass
+class CalibrationSummary:
+    """High-level calibration summary for reporting."""
+    n_samples: int
+    positive_rate: float
+    mean_confidence: float
+    brier_score: float
+    ece: float
+    mce: float
+    n_bins: int
+
+
+def validate_calibration_inputs(
+    predictions: List[float],
+    outcomes: List[int]
+) -> Tuple[bool, List[str]]:
+    """
+    Validate basic calibration inputs.
+
+    Args:
+        predictions: List of confidence scores (0-1)
+        outcomes: List of actual outcomes (0 or 1)
+
+    Returns:
+        Tuple of (is_valid, list of issues)
+    """
+    issues = []
+    if len(predictions) != len(outcomes):
+        issues.append("Predictions and outcomes must have same length")
+
+    if len(predictions) == 0:
+        issues.append("No samples provided for calibration")
+
+    for i, p in enumerate(predictions):
+        if p < 0.0 or p > 1.0:
+            issues.append(f"Prediction {i} out of bounds: {p}")
+
+    for i, o in enumerate(outcomes):
+        if o not in (0, 1):
+            issues.append(f"Outcome {i} not binary: {o}")
+
+    return len(issues) == 0, issues
+
 def brier_score(predictions: List[float], outcomes: List[int]) -> float:
     """
     Calculate Brier Score (Mean Squared Error).
@@ -241,6 +284,47 @@ def analyze_calibration(
         bin_confidences=bin_confidences,
         bin_accuracies=bin_accuracies,
         calibration_difference=calibration_diffs
+    )
+
+
+def summarize_calibration(
+    predictions: List[float],
+    outcomes: List[int],
+    n_bins: int = 10
+) -> CalibrationSummary:
+    """
+    Produce a compact summary for reporting calibration quality.
+
+    Args:
+        predictions: List of confidence scores (0-1)
+        outcomes: List of actual outcomes (0 or 1)
+        n_bins: Number of bins
+
+    Returns:
+        CalibrationSummary with aggregate metrics
+    """
+    if not predictions:
+        return CalibrationSummary(
+            n_samples=0,
+            positive_rate=0.0,
+            mean_confidence=0.0,
+            brier_score=1.0,
+            ece=1.0,
+            mce=1.0,
+            n_bins=n_bins,
+        )
+
+    result = analyze_calibration(predictions, outcomes, n_bins)
+    positive_rate = float(np.mean(outcomes)) if outcomes else 0.0
+    mean_confidence = float(np.mean(predictions)) if predictions else 0.0
+    return CalibrationSummary(
+        n_samples=len(predictions),
+        positive_rate=positive_rate,
+        mean_confidence=mean_confidence,
+        brier_score=result.brier_score,
+        ece=result.ece,
+        mce=result.mce,
+        n_bins=n_bins,
     )
 
 
