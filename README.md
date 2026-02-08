@@ -1,8 +1,16 @@
 # Bayesian Confidence Scoring for OpenCTI
 
-This project implements a Bayesian network-based confidence scoring system for OpenCTI (Open Cyber Threat Intelligence). It uses a custom hybrid inference engine that combines Noisy-OR logic with damped fixed-point iteration for cyclic graphs to compute posterior probabilities for threat intelligence entities.
+## Abstract
 
-## Features
+This academic research project develops a Bayesian confidence propagation system for OpenCTI (Open Cyber Threat Intelligence). The methodology combines Noisy-OR inference with damped fixed-point updates for cyclic graphs to estimate posterior confidence for threat intelligence entities while preserving interpretability through explicit edge weights and parent contributions.
+
+## Research Objectives
+
+- Formalize confidence propagation for heterogeneous threat intelligence graphs.
+- Provide real-time posterior updates with transparent attribution paths.
+- Evaluate output quality with statistical consistency checks and calibration metrics.
+
+## System Features
 
 - **Hybrid Inference**: Exact Noisy-OR updates for acyclic components, damped fixed-point for cyclic strongly connected components.
 - **Real-time Updates**: Live confidence propagation via Server-Sent Events (SSE).
@@ -117,23 +125,26 @@ prob_true, prob_pred = calibration_curve(
 - [SciPy](https://scipy.org/) - Statistical tests for calibration
 - [MLmetrics](https://github.com/mlmetrics/mlmetrics) - Calibration error metrics
 
-#### Sample Data Calibration Snapshot (proxy labels)
+**Utilities (in-repo):**
+- `validate_calibration_inputs` ensures bounds and binary outcomes.
+- `summarize_calibration` provides aggregate calibration statistics for reporting.
 
-Using `sample_data.json`, we ran `validation.calibration.analyze_calibration` on
-objects with confidence scores (excluding relationship objects). Because the
+#### Sample Data Calibration Summary (proxy labels)
+
+Using `sample_data.json`, we ran `validation.calibration.summarize_calibration`
+on objects with confidence scores (excluding relationship objects). Because the
 sample data does not include ground-truth outcomes, we used sightings as a proxy
 label: outcome = 1 for objects referenced by `sighting_of_ref` or
-`where_sighted_refs`, else 0. This is a sparse signal and should be treated as a
-sanity check only.
+`where_sighted_refs`, else 0. This proxy is sparse and should be interpreted as
+an exploratory sanity check rather than a definitive calibration study.
 
-- Eligible objects: 11
-- Observed positives (sightings): 1
+- Eligible objects (non-relationship with confidence): 11
+- Positive rate (proxy): 0.0909
+- Mean confidence: 0.7227
 - Brier score: 0.6202
 - ECE: 0.7773
 - MCE: 0.8667
-- Bin counts (n_bins=5): [0, 1, 2, 2, 6]
-- Bin confidences: [0.0, 0.2, 0.55, 0.725, 0.867]
-- Bin accuracies: [0.0, 1.0, 0.0, 0.0, 0.0]
+- n_bins: 5
 
 ### 3. Cross-Validation with External Feeds
 
@@ -225,6 +236,33 @@ def brier_score(predictions, outcomes):
 - [ ] Cross-references with external feeds
 - [ ] Anomalies flagged and reviewed
 - [ ] Model recalibrated quarterly
+
+### Validation Outcomes (Sample Data)
+
+The following results were computed on `sample_data.json` using STIX 2.1 parsing
+and the calibration utilities in `validation/calibration.py`.
+
+- STIX objects: 47
+- STIX parse errors: 0
+- Confidence present: 37
+- Confidence missing: 10
+- Confidence non-numeric: 0
+- Confidence out of range: 0
+- Mean confidence (0-100): 77.7
+
+### Correctness Audit (Resolved)
+
+Logical issues identified during review and addressed in the current `main` branch:
+
+- **STIX relationship semantics**: relationship objects now use `relationship_type`
+  when present, avoiding incorrect default weighting when `type == "relationship"`.
+- **Missing confidence handling**: OpenCTI objects preserve `None` confidence so
+  default priors are applied instead of forcing zero confidence.
+- **Time decay application**: node priors now apply time decay using
+  `updated_at`, `modified`, or `created` timestamps with case-insensitive type
+  matching for configuration keys.
+- **Case-insensitive weights**: relationship type weights and time-decay maps are
+  normalized to ensure consistent behavior across data sources.
 
 ## Architecture
 
