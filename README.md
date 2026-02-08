@@ -218,7 +218,7 @@ def brier_score(predictions, outcomes):
 ## Testing
 
 ```bash
-pytest tests/
+python3 -m pytest
 ```
 
 ## Configuration Reference
