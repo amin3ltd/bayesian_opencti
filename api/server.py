@@ -1,8 +1,27 @@
 from flask import Flask, jsonify, Response, request
 from flask_cors import CORS
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 import json, queue, yaml, copy
+
+def _parse_int_param(name: str, default: int, minimum: int = 1, maximum: int = 10000) -> Tuple[int, Optional[str]]:
+    """Parse and validate an integer query parameter.
+
+    Returns:
+        (value, error_message) — error_message is None on success.
+    """
+    raw = request.args.get(name)
+    if raw is None:
+        return default, None
+    try:
+        val = int(raw)
+    except (ValueError, TypeError):
+        return default, f"Parameter '{name}' must be an integer, got: {raw}"
+    if val < minimum:
+        return default, f"Parameter '{name}' must be >= {minimum}, got: {val}"
+    if val > maximum:
+        return default, f"Parameter '{name}' must be <= {maximum}, got: {val}"
+    return val, None
 
 def create_app(sync_manager, event_bus, recompute_cb=None, config_path="config/bayes.yaml"):
     # Serve dashboard as before
@@ -95,8 +114,9 @@ def create_app(sync_manager, event_bus, recompute_cb=None, config_path="config/b
     def contributions():
         try:
             nid = request.args.get("id")
-            topk = int(request.args.get("topk", 10))
             if not nid: return jsonify({"error": "id required"}), 400
+            topk, err = _parse_int_param("topk", default=10, minimum=1, maximum=1000)
+            if err: return jsonify({"error": err}), 400
             if nid not in sync_manager.bayes.nodes: return jsonify({"error": "unknown id"}), 404
             base = _noisyor_with_parents(nid)
             out = []
@@ -116,9 +136,11 @@ def create_app(sync_manager, event_bus, recompute_cb=None, config_path="config/b
     def paths():
         try:
             nid = request.args.get("id")
-            k = int(request.args.get("k", 5))
-            maxlen = int(request.args.get("maxlen", 3))
             if not nid: return jsonify({"error": "id required"}), 400
+            k, err = _parse_int_param("k", default=5, minimum=1, maximum=100)
+            if err: return jsonify({"error": err}), 400
+            maxlen, err = _parse_int_param("maxlen", default=3, minimum=1, maximum=20)
+            if err: return jsonify({"error": err}), 400
             if nid not in sync_manager.bayes.nodes: return jsonify({"error": "unknown id"}), 404
             best = []
             def dfs(curr, path, prod_w, start_belief, depth):
