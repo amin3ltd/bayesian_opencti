@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, Tuple, Set, Optional
+from typing import Dict, Tuple, Set, Optional, List
 from dataclasses import dataclass
 import math
 import networkx as nx
@@ -9,7 +9,11 @@ import networkx as nx
 EPS = 1e-9
 
 def clamp01(x: float) -> float:
-    return max(EPS, min(1.0 - EPS, float(x)))
+    """Clamp value to (EPS, 1-EPS), rejecting NaN/Inf."""
+    val = float(x)
+    if math.isnan(val) or math.isinf(val):
+        return 0.5  # safe fallback for corrupted input
+    return max(EPS, min(1.0 - EPS, val))
 
 # ------------------ data ------------------
 
@@ -55,16 +59,24 @@ class BayesianConfidenceModel:
         Add or update node. confidence_pct is 0..100 (user input).
         We store as floats in 0..1. We keep prior == user_confidence for now.
         """
-        uc = clamp01(float(confidence_pct) / 100.0)
+        if not nid:
+            return  # reject empty IDs
+        try:
+            pct = float(confidence_pct)
+            if math.isnan(pct) or math.isinf(pct):
+                pct = 50.0  # safe default for corrupted input
+        except (TypeError, ValueError):
+            pct = 50.0
+        uc = clamp01(pct / 100.0)
         prior = uc
         if nid not in self.nodes:
-            self.nodes[nid] = NodeInfo(id=nid, type=ntype, name=name,
+            self.nodes[nid] = NodeInfo(id=nid, type=ntype or "Unknown", name=name or nid,
                                       user_confidence=uc, prior=prior, belief=None)
             self.G.add_node(nid)
         else:
             n = self.nodes[nid]
-            n.type = ntype
-            n.name = name
+            n.type = ntype or n.type
+            n.name = name or n.name
             n.user_confidence = uc
             n.prior = prior
             # do not overwrite belief (warm start preserved)
@@ -74,10 +86,18 @@ class BayesianConfidenceModel:
         Add/update directed edge src -> dst with weight in 0..100.
         Enforces parent cap (keeps strongest max_parents parents for dst).
         """
+        if not src or not dst:
+            return
         if src == dst or src not in self.nodes or dst not in self.nodes:
             return
 
-        w = clamp01(float(weight_pct) / 100.0)
+        try:
+            wpct = float(weight_pct)
+            if math.isnan(wpct) or math.isinf(wpct):
+                wpct = 50.0
+        except (TypeError, ValueError):
+            wpct = 50.0
+        w = clamp01(wpct / 100.0)
         # store/update edge
         self.G.add_edge(src, dst)
         self.edge_w[(src, dst)] = float(w)
@@ -126,6 +146,9 @@ class BayesianConfidenceModel:
               * Else: run damped fixed-point iterations inside the SCC using noisy-or updates,
                       treating external parents with their already-computed beliefs.
         """
+        if not self.nodes:
+            return {}
+
         # warm start: use existing belief if present else prior
         beliefs: Dict[str, float] = {
             nid: (info.belief if info.belief is not None else info.prior)
@@ -144,6 +167,8 @@ class BayesianConfidenceModel:
                 C.add_edge(cu, cv)
         order = list(nx.topological_sort(C))
 
+        convergence_info: List[Dict] = []
+
         # process components
         for cid in order:
             comp_nodes: Set[str] = C.nodes[cid]["nodes"]
@@ -160,13 +185,16 @@ class BayesianConfidenceModel:
             # initialize local beliefs from global beliefs (warm start)
             b_old = {n: beliefs.get(n, self.nodes[n].prior) for n in comp_list}
 
-            for _ in range(self.max_iters):
+            converged = False
+            iters_used = 0
+            for it in range(self.max_iters):
                 b_new: Dict[str, float] = {}
                 max_delta = 0.0
                 for n in comp_list:
                     # build a belief dict where parents inside SCC use b_old, external parents use beliefs
-                    def parent_bel(p):
-                        return b_old[p] if p in comp_nodes else beliefs.get(p, self.nodes[p].prior if p in self.nodes else 0.0)
+                    # Use default argument to capture current comp_nodes for closure
+                    def parent_bel(p, _cn=comp_nodes, _bo=b_old, _bl=beliefs):
+                        return _bo[p] if p in _cn else _bl.get(p, self.nodes[p].prior if p in self.nodes else 0.0)
 
                     # compute noisy-or using parent_bel
                     prod = 1.0 - self.nodes[n].prior
@@ -182,17 +210,36 @@ class BayesianConfidenceModel:
                     max_delta = max(max_delta, abs(updated - b_old[n]))
 
                 b_old = b_new
+                iters_used = it + 1
                 if max_delta < self.epsilon:
+                    converged = True
                     break
 
             for n in comp_list:
                 beliefs[n] = b_old[n]
 
-        # persist posteriors as plain floats
+            if len(comp_list) > 1 or self.G.has_edge(comp_list[0], comp_list[0]):
+                convergence_info.append({
+                    "scc_size": len(comp_list),
+                    "iterations": iters_used,
+                    "converged": converged,
+                })
+
+        self._last_convergence_info = convergence_info
+
+        # persist posteriors as plain floats, with NaN safety
         for nid, v in beliefs.items():
-            self.nodes[nid].belief = float(v)
+            fv = float(v)
+            if math.isnan(fv) or math.isinf(fv):
+                fv = float(self.nodes[nid].prior)
+            self.nodes[nid].belief = fv
+            beliefs[nid] = fv
 
         return {nid: float(v) for nid, v in beliefs.items()}
+
+    def get_convergence_info(self) -> List[Dict]:
+        """Return convergence info from the last infer_all() call."""
+        return getattr(self, "_last_convergence_info", [])
 
     # ---------- helpers ----------
 
